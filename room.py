@@ -25,16 +25,17 @@ class Room(Label, GridWidget):
                      randint(2, self.max_dim) * self.grid_unit)
         self.area = self.size[0] * self.size[1]
         self.neighbors = set()
-        self.bind(size=self.update_bbox,
-                  pos=self.update_bbox,
-                  grid_unit=self.update_bbox)
+        self.bind(size=self._update_bbox,
+                  pos=self._update_bbox,
+                  grid_unit=self._update_bbox)
 
     @property
     def weight(self):
         return len(self.neighbors)
 
-    def update_bbox(self, instance, value):
+    def _update_bbox(self, instance, value):
         '''
+        
         '''
         b = self.grid_unit * 2
         self.bmin = self.x - b, self.y - b
@@ -73,17 +74,28 @@ class Room(Label, GridWidget):
         '''
         grid = grid or self.grid_unit
         
-        self.pos = Vector(self.x//grid,self.y//grid) * grid
+        self.pos = Vector(int(self.x)//grid,int(self.y)//grid) * grid
 
     def move(self, width, height):
         '''
         '''
  
-        if self.right > width or self.x < 0:
+        if self.right >= width or self.x <= 0:
             self.v_x *= -1
-        if self.top > height or self.y < 0:
+        if self.top >= height or self.y <= 0:
             self.v_y *= -1
         self.pos = Vector(self.velocity) + self.pos
+
+    def friend(self, other):
+        
+        self.neighbors.add(other)
+        other.neighbors.add(self)
+
+    def unfriend(self, other):
+
+        if other in self.neighbors and self in other.neighbors:
+            self.neighbors.remove(other)
+            other.neighbors.remove(self)
 
         
         
