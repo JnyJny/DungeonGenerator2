@@ -24,18 +24,17 @@ class DungeonApp(App):
     def reset(self, arg):
         self.state = State.ANIMATING
         self.generator.generate_rooms()
-
-    def center(self, arg):
-        if self.state != State.ANIMATING:
-            self.generator.center_rooms()        
+        
 
     def identify(self, arg):
         if self.state != State.ANIMATING:
             self.generator.identify_rooms()
-
+            self.generator.center_rooms()
+            
     def cull_rooms(self, arg):
         if self.state != State.ANIMATING:
             self.generator.identify_rooms(clear=True)
+            self.generator.center_rooms()
 
     def triangulate(self, arg):
         if self.state != State.ANIMATING:
@@ -53,22 +52,18 @@ class DungeonApp(App):
     def build(self):
         Window.size = (1024, 1024)
         
-        self.state = State.ANIMATING
+        self.state = State.PAUSED
         self.generator = DungeonGenerator(size=Window.size,
                                           size_hint=(.9,1))
         self.buttons = BoxLayout(orientation='horizontal', size_hint=(1,.1))
         self.buttons.add_widget(Button(text='Start',
                                        on_press=self.reset))
-        self.buttons.add_widget(Button(text='Center',
-                                       on_press=self.center))
         self.buttons.add_widget(Button(text='Identify',
                                        on_press=self.identify))
         self.buttons.add_widget(Button(text='Cull',
                                        on_press=self.cull_rooms))
         self.buttons.add_widget(Button(text='Triangulate',
                                        on_press=self.triangulate))
-        self.buttons.add_widget(Button(text='Prune Edges',
-                                       on_press=self.prune_edges))
         self.buttons.add_widget(Button(text='Build Hallways',
                                        on_press=self.hallways))
         self.root = BoxLayout(orientation='vertical')
@@ -84,8 +79,6 @@ class DungeonApp(App):
         '''
         '''
 
-#        self.generator.clear_frame()
-
         if self.state is State.PAUSED:
             return
 
@@ -93,6 +86,7 @@ class DungeonApp(App):
             result = self.generator.spread_out_rooms(dt)
             if result:
                 self.state = State.PAUSED
+                self.generator.center_rooms()
             return
 
 
