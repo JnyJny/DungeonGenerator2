@@ -139,7 +139,8 @@ class DungeonGenerator(Widget):
         for room in self.rooms:
             room.pos = Vector(room.pos) + (dx,dy)
 
-    def triangulate_rooms(self):
+
+    def build_hallways(self):
         '''
         '''
 
@@ -158,24 +159,7 @@ class DungeonGenerator(Widget):
                     room.unfriend(n)
                     
             Logger.info(f'Prune: room {room.text} weight {len(neighbors)} -> {room.weight}')
-
-        for room in self.rooms:
-            for n in room.neighbors:
-                l = Line(points=(room.center, n.center))
-                self.edges.append(l)
-                self.canvas.add(l)
-                
-
-    def prune_edges(self, clear=False):
-        '''
-        '''
-        Logger.info(f'Prune:')
-
             
-
-    def build_hallways(self):
-        '''
-        '''
         Logger.info(f'Hallways:')
 
         hallways = {}
@@ -193,7 +177,6 @@ class DungeonGenerator(Widget):
                 
         base = len(self.children)
         for i, h in enumerate(self.hallways):
-            h.hue = (i / len(self.hallways)) - 0.1
             self.add_widget(h, index=base+i)
 
 
