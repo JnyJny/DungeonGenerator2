@@ -9,15 +9,15 @@ from kivy.logger import Logger
 from kivy.clock import Clock
 
 from room import Room
+from hallway import Hallway
 from random import randint
 from scipy.spatial import Delaunay
 from collections import deque, defaultdict
 from itertools import combinations
-
+from gridwidget import GridWidget
 
 class DungeonGenerator(Widget):
-    
-    grid = NumericProperty(11)
+
     n_rooms = NumericProperty(40)
     rooms = ListProperty([])
     hallways = ListProperty([])
@@ -41,8 +41,7 @@ class DungeonGenerator(Widget):
             self.hallways = []
         
         for n in range(n_rooms):
-            r = Room(text=f'{n}',
-                     grid_unit=self.grid)
+            r = Room(text=f'{n}')
             self.rooms.append(r)
             self.add_widget(r)
             
@@ -89,9 +88,6 @@ class DungeonGenerator(Widget):
     def align_rooms_to_grid(self, grid=None):
         '''
         '''
-
-        grid = grid or self.grid
-        
         for room in self.rooms:
             room.align_to_grid(grid)
 
@@ -151,12 +147,23 @@ class DungeonGenerator(Widget):
             
         for t in tris.simplices:
             for a,b in combinations([self.rooms[i] for i in t], 2):
-                a.neighbors.add(b)
-                b.neighbors.add(a)
-                self.edges.append(Line(points=(a.center,b.center)))
-                self.canvas.add(self.edges[-1])
+                a.friend(b)
+                
         for room in self.rooms:
-            Logger.info(f'Triangulate: room {room.text} weight {room.weight}')
+            neighbors = list(room.neighbors) # avoid mutating room.neighbors
+            for n in neighbors:
+                if room.weight <= 3:
+                    break
+                if n.weight > 1:
+                    room.unfriend(n)
+                    
+            Logger.info(f'Prune: room {room.text} weight {len(neighbors)} -> {room.weight}')
+
+        for room in self.rooms:
+            for n in room.neighbors:
+                l = Line(points=(room.center, n.center))
+                self.edges.append(l)
+                self.canvas.add(l)
                 
 
     def prune_edges(self, clear=False):
@@ -170,6 +177,23 @@ class DungeonGenerator(Widget):
         '''
         '''
         Logger.info(f'Hallways:')
-        return False
+
+        hallways = {}
+
+        for room in self.rooms:
+            for neighbor in room.neighbors:
+                h = Hallway(room, neighbor)
+                try:
+                    hallways[h.key]
+                    del(h)
+                except KeyError:
+                    hallways[h.key] = h
+
+        self.hallways = list(hallways.values())
+                
+        base = len(self.children)
+        for i, h in enumerate(self.hallways):
+            h.hue = (i / len(self.hallways)) - 0.1
+            self.add_widget(h, index=base+i)
 
 
