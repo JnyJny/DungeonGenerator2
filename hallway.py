@@ -16,6 +16,7 @@ class Hallway(Widget):
         super(Hallway, self).__init__(**kwargs)
         self.src_id = int(src_room.text)
         self.dst_id = int(dst_room.text)
+        self.hue = self.src_id / 50
         Logger.info(f'Hallway init: {self.key}')
         self.A = src_room.center
         self.B = src_room.center_x, dst_room.center_y
