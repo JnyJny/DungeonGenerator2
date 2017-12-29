@@ -35,15 +35,6 @@ class DungeonApp(App):
         if self.state != State.ANIMATING:
             self.generator.identify_rooms(clear=True)
             self.generator.center_rooms()
-
-    def triangulate(self, arg):
-        if self.state != State.ANIMATING:
-            self.generator.triangulate_rooms()
-
-    def prune_edges(self, arg):
-        
-        if self.state != State.ANIMATING:
-            self.generator.prune_edges()
         
     def hallways(self, arg):
         if self.state != State.ANIMATING:
@@ -56,16 +47,15 @@ class DungeonApp(App):
         self.generator = DungeonGenerator(size=Window.size,
                                           size_hint=(.9,1))
         self.buttons = BoxLayout(orientation='horizontal', size_hint=(1,.1))
-        self.buttons.add_widget(Button(text='Start',
-                                       on_press=self.reset))
-        self.buttons.add_widget(Button(text='Identify',
-                                       on_press=self.identify))
-        self.buttons.add_widget(Button(text='Cull',
-                                       on_press=self.cull_rooms))
-        self.buttons.add_widget(Button(text='Triangulate',
-                                       on_press=self.triangulate))
-        self.buttons.add_widget(Button(text='Build Hallways',
-                                       on_press=self.hallways))
+
+        self.btn0 = Button(text='Start', on_press=self.reset)
+        self.btn1 = Button(text='Identify', on_press=self.identify)
+        self.btn2 = Button(text='Cull', on_press=self.cull_rooms)
+        self.btn3 = Button(text='Build Hallways', on_press=self.hallways)
+
+        for btn in [self.btn0, self.btn1, self.btn2, self.btn3]:
+            self.buttons.add_widget(btn)
+            
         self.root = BoxLayout(orientation='vertical')
         self.root.add_widget(self.generator)
         self.root.add_widget(self.buttons)
@@ -78,6 +68,9 @@ class DungeonApp(App):
     def update(self, dt):
         '''
         '''
+
+        for btn in [self.btn1, self.btn2, self.btn3]:
+            btn.disabled = self.state is State.ANIMATING
 
         if self.state is State.PAUSED:
             return
